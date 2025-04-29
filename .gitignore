@@ -1,0 +1,11 @@
+#Python Files
+.venv
+*pycache*
+
+#Audio Files
+*.mp3
+
+#Exported files
+transcription_output.txt
+chunked_outputs.txt
+final_youtube_summary.txt
