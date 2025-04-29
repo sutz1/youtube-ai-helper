@@ -39,12 +39,12 @@ def transcribe_audio(audio_path, output_path="transcription_output.txt", model_s
         print(f"❌ Error during transcription: {e}")
 
 # ----------------- CHUNKING -----------------
-def split_text_into_chunks(text, max_words=3000):
+def split_text_into_chunks(text, max_words=1000):
     words = text.split()
     return [" ".join(words[i:i+max_words]) for i in range(0, len(words), max_words)]
 
 # ----------------- OLLAMA GENERATION -----------------
-def generate_from_chunks(full_transcript_text, model="llama3.2"):
+def generate_from_chunks(full_transcript_text, model="gemma3:4b"):
     chunks = split_text_into_chunks(full_transcript_text)
     all_outputs = []
 
@@ -54,10 +54,8 @@ def generate_from_chunks(full_transcript_text, model="llama3.2"):
         prompt = f"""
 You are a YouTube assistant. A new episode of a podcast about the video game The Finals has been transcribed.
 Use the text below to create the following:
-- A suitable, clickable **title**
-- A 4–6 sentence **description** for YouTube
-- 3–6 **timestamps** with short labels
-
+- A brief summary of what this chunk was about.
+- Provide **timestamps** for each segment of the podcast in minute:second format (e.g. 00:01) with short labels.
 ⚠️ Do NOT reuse anything from this example — it is only for tone reference:
 "{previous_description}"
 
@@ -78,14 +76,14 @@ Use the text below to create the following:
     return all_outputs
 
 # ----------------- OPTIONAL FINAL SUMMARY -----------------
-def merge_chunk_summaries(chunks_outputs, model="llama3.2"):
+def merge_chunk_summaries(chunks_outputs, model="gemma3:4b"):
     combined = "\n\n".join([f"Chunk {i}:\n{output}" for i, output in chunks_outputs])
 
     final_prompt = f"""
 Based on the following chunked summaries of a podcast, please combine them into a single:
 1. YouTube **Title**
-2. 4–6 sentence **Description**
-3. Timestamp list (3–6 items)
+2. **Description**
+3. **timestamps** with short labels in minute :second format (e.g. 00:01) for each segment of the podcast. The time stamps should continue off the previous ones provided.
 
 Here are the chunks:
 {combined}
@@ -102,7 +100,7 @@ Here are the chunks:
 # ----------------- MAIN PIPELINE -----------------
 def run_pipeline(audio_path):
     print("🗣️ Starting transcription...")
-    transcribe_audio(audio_path)
+    """ transcribe_audio(audio_path) """
     
     print(f"📄 Transcription complete. Reading from transcription_out.txt")
     # Step 2: Read and chunk
@@ -128,5 +126,5 @@ def run_pipeline(audio_path):
 
 # ----------------- ENTRYPOINT -----------------
 if __name__ == "__main__":
-    AUDIO_FILE_PATH = r"src\STRIKE A POSE IS BACK! _ The Finals Update 6.5 Overview.mp3"
+    AUDIO_FILE_PATH = r"src\Is The Finals the next big ESPORT_ Feat_ @WaltzCasts _ Around the Arena EP 4 _ The Finals Podcast.mp3"
     run_pipeline(AUDIO_FILE_PATH)
